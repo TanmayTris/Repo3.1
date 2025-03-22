@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.utils.tensorboard as tb
 
 from .models import ClassificationLoss, load_model, save_model
