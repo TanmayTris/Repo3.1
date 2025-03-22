@@ -14,7 +14,7 @@ from utils import load_data
 
 def train(
     exp_dir: str = "logs",
-    model_name: str = "Classifier",
+    model_name: str = "classifier",
     num_epoch: int = 50,
     lr: float = 1e-3,
     batch_size: int = 128,
