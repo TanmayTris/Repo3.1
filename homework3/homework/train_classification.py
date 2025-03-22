@@ -10,8 +10,6 @@ from .models import ClassificationLoss, load_model, save_model
 from .utils import load_data
 
 
-from utils import load_data
-
 
 def train(
     exp_dir: str = "logs",
