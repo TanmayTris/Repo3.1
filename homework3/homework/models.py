@@ -210,7 +210,7 @@ class Detector(torch.nn.Module):
 
 
 MODEL_FACTORY = {
-    "classifier": Classifier,
+    "classifier": classifier,
     "detector": Detector,
 }
 
