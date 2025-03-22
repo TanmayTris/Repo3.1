@@ -27,7 +27,17 @@ class Classifier(nn.Module):
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
 
         # TODO: implement
-        pass
+        # Convolutional layers
+        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+
+        # Fully connected layers
+        self.fc1 = nn.Linear(128 * 8 * 8, 512)
+        self.fc2 = nn.Linear(512, num_classes)
+
+        # Dropout for regularization
+        self.dropout = nn.Dropout(0.5)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -41,7 +51,22 @@ class Classifier(nn.Module):
         z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
         # TODO: replace with actual forward pass
-        logits = torch.randn(x.size(0), 6)
+         # Forward pass through convolutional layers
+        x = F.relu(self.conv1(z))
+        x = F.max_pool2d(x, 2)  # Max pooling
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        x = F.relu(self.conv3(x))
+        x = F.max_pool2d(x, 2)
+
+        # Flatten the output for fully connected layers
+        x = torch.flatten(x, 1)
+
+        # Pass through fully connected layers
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)  # Apply dropout
+        logits = self.fc2(x)
+       # logits = torch.randn(x.size(0), 6)
 
         return logits
 
@@ -79,7 +104,14 @@ class Detector(torch.nn.Module):
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
 
         # TODO: implement
-        pass
+        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+
+        self.logits = nn.Conv2d(128, num_classes, kernel_size=1)
+        self.depth = nn.Conv2d(128, 1, kernel_size=1)
+
+        self.pool = nn.MaxPool2d(2, 2)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
