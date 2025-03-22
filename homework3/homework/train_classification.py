@@ -7,7 +7,6 @@ import torch
 import torch.utils.tensorboard as tb
 
 from homework.classification_loss import ClassificationLoss # Import the ClassificationLoss class
-from .models import ClassificationLoss, load_model, save_model
 from .models import Classifier, load_model, save_model
 from .models import Detector, load_model, save_model
 # from models import Classifier, load_model, save_model
