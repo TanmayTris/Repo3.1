@@ -68,9 +68,10 @@ def train(
             # Forward pass
             if model_name == "detector":  # for the detector model
               logits, _ = model(img)  # We only care about the logits for loss
+              loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
             else:  # for other models like classifier
               logits = model(img)  # Classifier directly returns logits
-            loss = loss_func(logits, label)
+              loss = loss_func(logits, label)
 
             # Backward pass and optimization
             optimizer.zero_grad()  # clear previous gradients
