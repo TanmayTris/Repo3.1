@@ -71,6 +71,10 @@ def train(
               logits, _ = model(img)  # We only care about the logits for loss
               label = label.long() 
               loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
+              label = label.view(label.size(0), 1, 1).expand(-1, logits.size(2), logits.size(3))  
+              label = label.long() # Ensure label is of type long
+              loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
+                
             else:  # for other models like classifier
               logits = model(img)  # Classifier directly returns logits
               loss = loss_func(logits, label)
