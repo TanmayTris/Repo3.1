@@ -69,6 +69,10 @@ def train(
             # Forward pass
             if model_name == "detector":  # for the detector model
               logits, _ = model(img)  # We only care about the logits for loss
+              # Reshape logits to (batch_size, num_classes, height, width)
+              logits = logits.view(logits.shape[0], logits.shape[1], -1)
+              # Reshape label to (batch_size, height, width)
+              label = label.view(label.shape[0], -1)  
               loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
             else:  # for other models like classifier
               logits = model(img)  # Classifier directly returns logits
