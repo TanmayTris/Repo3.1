@@ -6,8 +6,9 @@ import numpy as np
 import torch
 import torch.utils.tensorboard as tb
 
-from models import ClassificationLoss, load_model, save_model
-from utils import load_data
+from homework3.models import ClassificationLoss, load_model, save_model
+# from models import ClassificationLoss, load_model, save_model
+from .utils import load_data
 
 
 def train(
