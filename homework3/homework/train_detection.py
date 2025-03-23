@@ -97,8 +97,9 @@ def train(
         # disable gradient computation and switch to evaluation mode
             with torch.no_grad():
               model.eval()
-
+            
             for data in val_data:
+              if "image" in data and "track" in data and "depth" in data:  
                 img = data["image"].to(device)     # Move image to device (GPU or CPU)
                 label = data["track"].to(device)   # Move track to device
                 depth = data["depth"].to(device)   # Move depth to device
@@ -112,7 +113,9 @@ def train(
 
                 metrics["val_acc"].append(accuracy)
                 metrics["val_depth_error"].append(depth_error)
-                
+            else:
+                print("Sample does not have the expected keys!")
+                continue  # Skip this sample if it doesn't have the expected keys
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
