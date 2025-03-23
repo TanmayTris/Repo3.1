@@ -18,8 +18,6 @@ def train(
     lr: float = 1e-3,
     batch_size: int = 128,
     seed: int = 2024,
-    hidden_dim: int = 64,
-    num_layers: int = 2,
     **kwargs,
 ):
     if torch.cuda.is_available():
@@ -46,34 +44,34 @@ def train(
     train_data = load_data("classification_data/train", shuffle=True, batch_size=batch_size, num_workers=2)
     val_data = load_data("classification_data/val", shuffle=False)
 
-    # create loss function and optimizer
-    loss_func = ClassificationLoss()
-    # optimizer = ...
+    # Loss functions
+    segmentation_loss = nn.CrossEntropyLoss()
+    depth_loss = nn.L1Loss()
+   
+    # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     
     global_step = 0
-    metrics = {"train_acc": [], "val_acc": []}
+    metrics = {"train_acc": [], "val_acc": [], "train_depth_error": [], "val_depth_error": []}
 
     # training loop
-    for epoch in range(num_epoch):
-        # clear metrics at beginning of epoch
-        for key in metrics:
-            metrics[key].clear()
-
+   for epoch in range(num_epoch):
         model.train()
 
-        for img, label in train_data:
-            img, label = img.to(device), label.to(device)
+        for img, label, depth in train_data:
+            img, label, depth = img.to(device), label.to(device), depth.to(device)
+
 
             # TODO1: implement training step
             # Forward pass
             if model_name == "detector":  # for the detector model
-              logits, _ = model(img)  # We only care about the logits for loss
-              label = label.long() 
-              loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
-              label = label.view(label.size(0), 1, 1).expand(-1, logits.size(2), logits.size(3))  
-              label = label.long() # Ensure label is of type long
-              loss = nn.CrossEntropyLoss()(logits, label)  # Segmentation loss
+              logits, raw_depth = model(img)
+                 # Compute losses
+               segmentation_loss_value = segmentation_loss(logits, label)
+               depth_loss_value = depth_loss(raw_depth.squeeze(1), depth)
+
+            # Total loss
+            loss = segmentation_loss_value + depth_loss_value
                 
             else:  # for other models like classifier
               logits = model(img)  # Classifier directly returns logits
@@ -88,45 +86,46 @@ def train(
             _, predictions = logits.max(1)  # get the predicted class (index of max logit)
             correct = (predictions == label).sum().item()
             accuracy = correct / label.size(0)
-
+            depth_error = torch.abs(raw_depth - depth).mean().item()
             metrics["train_acc"].append(accuracy)
-            
+            metrics["train_depth_error"].append(depth_error)
             global_step += 1
 
         # disable gradient computation and switch to evaluation mode
-        with torch.inference_mode():
+         with torch.no_grad():
             model.eval()
 
             for img, label in val_data:
-                img, label = img.to(device), label.to(device)
+                img, label = img.to(device), label.to(device), depth.to(device)
 
                 # TODO: compute validation accuracy
-                # Forward pass
-                logits = model(img)
-
-                # Calculate validation accuracy
-                _, predictions = logits.max(1)
-                correct = (predictions == label).sum().item()
+                logits, raw_depth = model(img)
+                _, preds = logits.max(1)
+                correct = (preds == label).sum().item()
                 accuracy = correct / label.size(0)
+                depth_error = torch.abs(raw_depth - depth).mean().item()
 
                 metrics["val_acc"].append(accuracy)
+                metrics["val_depth_error"].append(depth_error)
                 
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
         epoch_val_acc = torch.as_tensor(metrics["val_acc"]).mean()
-        
+        epoch_train_depth_error = torch.as_tensor(metrics["train_depth_error"]).mean()
+        epoch_val_depth_error = torch.as_tensor(metrics["val_depth_error"]).mean()
+
         logger.add_scalar("train/accuracy", epoch_train_acc, epoch)
         logger.add_scalar("val/accuracy", epoch_val_acc, epoch)
-
+        logger.add_scalar("train/depth_error", epoch_train_depth_error, epoch)
+        logger.add_scalar("val/depth_error", epoch_val_depth_error, epoch)
         
         # print on first, last, every 10th epoch
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
-            print(
-                f"Epoch {epoch + 1:2d} / {num_epoch:2d}: "
-                f"train_acc={epoch_train_acc:.4f} "
-                f"val_acc={epoch_val_acc:.4f}"
-            )
+                print(f"Epoch {epoch + 1}/{num_epoch}: "
+                f"Train Acc: {epoch_train_acc:.4f}, Val Acc: {epoch_val_acc:.4f}, "
+                f"Train Depth Error: {epoch_train_depth_error:.4f}, Val Depth Error: {epoch_val_depth_error:.4f}")
+            
 
     # save and overwrite the model in the root directory for grading
     save_model(model)
