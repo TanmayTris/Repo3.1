@@ -98,9 +98,11 @@ def train(
             with torch.no_grad():
               model.eval()
 
-            for img, label in val_data:
-                img, label = img.to(device), label.to(device)
-        
+            for data in train_data:
+                img = data["image"].to(device)     # Move image to device (GPU or CPU)
+                label = data["track"].to(device)   # Move track to device
+                depth = data["depth"].to(device)   # Move depth to device
+            
                 # TODO: compute validation accuracy
                 logits, raw_depth = model(img)
                 _, preds = logits.max(1)
