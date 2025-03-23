@@ -91,8 +91,8 @@ def train(
             global_step += 1
 
         # disable gradient computation and switch to evaluation mode
-         with torch.no_grad():
-            model.eval()
+            with torch.no_grad():
+              model.eval()
 
             for img, label in val_data:
                 img, label = img.to(device), label.to(device), depth.to(device)
