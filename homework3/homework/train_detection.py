@@ -10,6 +10,7 @@ import torch.utils.tensorboard as tb
 from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
+from homework.datasets.road_transforms
 
 
 def train(
@@ -60,7 +61,10 @@ def train(
         model.train()
 
         for img, label,depth in train_data:
-            img, label, depth = img.to(device), label.to(device), depth.to(device)
+            img = img.to(device)
+            # Assuming label and depth are strings, convert them to tensors
+            label = torch.tensor(label, dtype=torch.long, device=device)
+            depth = torch.tensor(depth, dtype=torch.float, device=device)
 
             # TODO1: implement training step
             # Forward pass
