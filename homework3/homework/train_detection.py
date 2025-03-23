@@ -66,9 +66,9 @@ def train(
             # Forward pass
             if model_name == "detector":  # for the detector model
               logits, raw_depth = model(img)
-                 # Compute losses
-               segmentation_loss_value = segmentation_loss(logits, label)
-               depth_loss_value = depth_loss(raw_depth.squeeze(1), depth)
+              # Compute losses
+              segmentation_loss_value = segmentation_loss(logits, label)
+              depth_loss_value = depth_loss(raw_depth.squeeze(1), depth)
 
             # Total loss
             loss = segmentation_loss_value + depth_loss_value
