@@ -7,8 +7,8 @@ import torch
 import torch.utils.tensorboard as tb
 
 from .models import ClassificationLoss, load_model, save_model
-from .utils import load_data
-
+# from .utils import load_data
+from homework.datasets.classification_dataset import load_data
 
 
 def train(
