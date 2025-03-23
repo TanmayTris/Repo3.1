@@ -58,7 +58,7 @@ def train(
     for epoch in range(num_epoch):
         model.train()
 
-        for img, label, depth in train_data:
+        for img, label in train_data:
             img, label = img.to(device), label.to(device)
 
 
