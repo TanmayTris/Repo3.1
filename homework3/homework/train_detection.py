@@ -61,9 +61,9 @@ def train(
         model.train()
         
         for data in train_data:
-            img = data["image"].to(device)   # Accessing image from the dictionary
-            label = data["label"].to(device) # Accessing label from the dictionary
-            depth = data["depth"].to(device) # Accessing depth from the dictionary
+            img = torch.tensor(data["image"].to(device))   # Accessing image from the dictionary
+            label = torch.tensor(data["label"].to(device)) # Accessing label from the dictionary
+            depth = torch.tensor(data["depth"].to(device)) # Accessing depth from the dictionary
           
             # TODO1: implement training step
             # Forward pass
