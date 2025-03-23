@@ -99,8 +99,8 @@ def train(
               model.eval()
 
             for img, label in val_data:
-                img, label = img.to(device), label.to(device), depth.to(device)
-
+                img, label = img.to(device), label.to(device)
+        
                 # TODO: compute validation accuracy
                 logits, raw_depth = model(img)
                 _, preds = logits.max(1)
