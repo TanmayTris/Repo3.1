@@ -58,9 +58,8 @@ def train(
     for epoch in range(num_epoch):
         model.train()
 
-        for img, label in train_data:
-            img, label = img.to(device), label.to(device)
-
+        for img, label,depth in train_data:
+            img, label, depth = img.to(device), label.to(device), depth.to(device)
 
             # TODO1: implement training step
             # Forward pass
