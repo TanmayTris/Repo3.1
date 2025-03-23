@@ -136,7 +136,7 @@ def train(
     torch.save(model.state_dict(), log_dir / f"{model_name}.th")
     print(f"Model saved to {log_dir / f'{model_name}.th'}")
 
-'''
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -150,4 +150,4 @@ if __name__ == "__main__":
     # parser.add_argument("--num_layers", type=int, default=3)
 
     # pass all arguments to train
-    train(**vars(parser.parse_args()))  '''
+    train(**vars(parser.parse_args())) 
