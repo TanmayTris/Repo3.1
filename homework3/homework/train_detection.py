@@ -104,7 +104,21 @@ def train(
                 depth = data["depth"].to(device)   # Move depth to device
             
                 # TODO: compute validation accuracy
-                logits, raw_depth = model(img)
+                # Forward pass (same as in training, but no backpropagation here)
+              if model_name == "detector":  # For the detector model
+                 logits, raw_depth = model(img)
+            
+                # Compute losses
+                segmentation_loss_value = segmentation_loss(logits, label)
+                depth_loss_value = depth_loss(raw_depth.squeeze(1), depth)
+            
+                # Total loss
+                loss = segmentation_loss_value + depth_loss_value
+            
+             else:  # For other models like classifier
+               logits = model(img)  # Classifier directly returns logits
+               loss = loss_func(logits, label)
+               # Calculate validation accuracy
                 _, preds = logits.max(1)
                 correct = (preds == label).sum().item()
                 accuracy = correct / label.size(0)
