@@ -122,10 +122,12 @@ class Detector(torch.nn.Module):
         # Down-sampling layers (Convolutional layers)
         self.down1 = self.conv_block(in_channels, 16)
         self.down2 = self.conv_block(16, 32)
-
+        self.down3 = self.conv_block(32, 64)
+        
         # Up-sampling layers (Transposed Convolutional layers)
-        self.up1 = self.upconv_block(32, 16)
-        self.up2 = self.upconv_block(16, 16)
+        self.up1 = self.upconv_block(64, 32)
+        self.up2 = self.upconv_block(32, 16)
+        self.up3 = self.upconv_block(16, 16)
 
         # Segmentation head (Logits)
         self.logits = nn.Conv2d(16, num_classes, kernel_size=1)  # Output size: (B, 3, 96, 128)
@@ -172,17 +174,19 @@ class Detector(torch.nn.Module):
         z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
         # TODO: replace with actual forward pass
-        # Down-sampling pass
-        x1 = self.down1(z)  # (B, 16, 48, 64)
-        x2 = self.down2(x1)  # (B, 32, 24, 32)
+        # Down-sampling pass (convolution layers)
+        x1 = self.down1(z)
+        x2 = self.down2(x1)
+        x3 = self.down3(x2)
 
-        # Up-sampling pass
-        x3 = self.up1(x2)  # (B, 16, 48, 64)
-        x4 = self.up2(x3)  # (B, 16, 96, 128)
+        # Up-sampling pass (convolution transpose layers)
+        x4 = self.up1(x3)
+        x5 = self.up2(x4)
+        x6 = self.up3(x5)
 
         # Output heads
-        logits = self.logits(x4)  # (B, 3, 96, 128)
-        depth = self.depth(x4)  # (B, 1, 96, 128)
+        logits = self.logits(x6)  # (B, 3, 96, 128)
+        depth = self.depth(x6)  # (B, 1, 96, 128)
 
         return logits, depth
 
@@ -204,7 +208,7 @@ class Detector(torch.nn.Module):
 
         # Optional additional post-processing for depth only if needed
         # Normalize depth if required (scaling between 0 and 1)
-        depth = torch.sigmoid(raw_depth)  # Apply sigmoid to scale depth between 0 and 1
+        depth = torch.sigmoid(raw_depth)  
 
         return pred, depth
 
