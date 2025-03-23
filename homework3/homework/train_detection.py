@@ -61,7 +61,7 @@ def train(
         model.train()
         
         for data in train_data:
-            '''
+        
             img = data["image"]  # Move image to device (GPU or CPU)
             label = data["label"]  # Move label to device
             depth = data["depth"]  # Move depth to device
