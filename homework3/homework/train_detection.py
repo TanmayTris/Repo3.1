@@ -59,7 +59,7 @@ def train(
     # training loop
     for epoch in range(num_epoch):
         model.train()
-        
+    '''     
         for data in train_data:
             if isinstance(data, dict) and all(key in data for key in ["image", "label", "depth"]):
               img = data["image"].to(device)  # Move image to device (GPU or CPU)
@@ -68,7 +68,7 @@ def train(
             else:
               print("Error: Data is not in the expected format (missing keys).")
             continue
-          
+     '''     
             # TODO1: implement training step
             # Forward pass
             if model_name == "detector":  # for the detector model
