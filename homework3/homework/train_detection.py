@@ -62,14 +62,10 @@ def train(
         
         for data in train_data:
             '''
-            if isinstance(data, dict) and all(key in data for key in ["image", "label", "depth"]):
-              img = data["image"].to(device)  # Move image to device (GPU or CPU)
-              label = data["label"].to(device)  # Move label to device
-              depth = data["depth"].to(device)  # Move depth to device
-            else:
-              print("Error: Data is not in the expected format (missing keys).")
-            continue
-     '''     
+            img = data["image"]  # Move image to device (GPU or CPU)
+            label = data["label"]  # Move label to device
+            depth = data["depth"]  # Move depth to device
+             
             # TODO1: implement training step
             # Forward pass
             if model_name == "detector":  # for the detector model
