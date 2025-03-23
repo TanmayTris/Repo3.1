@@ -63,7 +63,7 @@ def train(
         for data in train_data:
         
             img = data["image"].to(device)     # Move image to device (GPU or CPU)
-            label = data["label"].to(device)   # Move label to device
+            label = data["track"].to(device)   # Move track to device
             depth = data["depth"].to(device)   # Move depth to device
              
             # TODO1: implement training step
