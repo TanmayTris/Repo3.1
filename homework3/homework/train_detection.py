@@ -14,7 +14,7 @@ from homework.datasets.road_dataset import load_data
 
 def train(
     exp_dir: str = "logs",
-    model_name: str = "Detector",
+    model_name: str = "detector",
     num_epoch: int = 50,
     lr: float = 1e-3,
     batch_size: int = 128,
