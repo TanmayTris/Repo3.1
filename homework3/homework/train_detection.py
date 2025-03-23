@@ -69,9 +69,8 @@ def train(
               # Compute losses
               segmentation_loss_value = segmentation_loss(logits, label)
               depth_loss_value = depth_loss(raw_depth.squeeze(1), depth)
-
-            # Total loss
-            loss = segmentation_loss_value + depth_loss_value
+              # Total loss
+              loss = segmentation_loss_value + depth_loss_value
                 
             else:  # for other models like classifier
               logits = model(img)  # Classifier directly returns logits
