@@ -59,7 +59,7 @@ def train(
         model.train()
 
         for img, label, depth in train_data:
-            img, label, depth = img.to(device), label.to(device), depth.to(device)
+            img, label = img.to(device), label.to(device)
 
 
             # TODO1: implement training step
