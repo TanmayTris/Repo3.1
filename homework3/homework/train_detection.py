@@ -59,13 +59,17 @@ def train(
     # training loop
     for epoch in range(num_epoch):
         model.train()
-
+'''
         for img, label,depth in train_data:
             img = img.to(device)
             # Assuming label and depth are strings, convert them to tensors
             label = torch.tensor(label, dtype=torch.long, device=device)
-            depth = torch.tensor(depth, dtype=torch.float, device=device)
-
+            depth = torch.tensor(depth, dtype=torch.float, device=device)  '''
+        for batch in train_data:
+            img = batch["image"].to(device)      # Assuming "image" is the correct key
+            label = batch["label"].to(device)    # Assuming "label" is the correct key
+            depth = batch["depth"].to(device)    # Assuming "depth" is the correct key
+            
             # TODO1: implement training step
             # Forward pass
             if model_name == "detector":  # for the detector model
