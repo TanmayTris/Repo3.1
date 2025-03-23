@@ -59,8 +59,9 @@ def train(
     # training loop
     for epoch in range(num_epoch):
         model.train()
-    '''     
+        
         for data in train_data:
+            '''
             if isinstance(data, dict) and all(key in data for key in ["image", "label", "depth"]):
               img = data["image"].to(device)  # Move image to device (GPU or CPU)
               label = data["label"].to(device)  # Move label to device
