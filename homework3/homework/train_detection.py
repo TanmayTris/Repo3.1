@@ -59,12 +59,11 @@ def train(
     # training loop
     for epoch in range(num_epoch):
         model.train()
-
-        for img, label,depth in train_data:
-            img = img.to(device)
-            # Assuming label and depth are strings, convert them to tensors
-            label = torch.tensor(label, dtype=torch.long, device=device)
-            depth = torch.tensor(depth, dtype=torch.float, device=device)  
+        
+        for data in train_data:
+            img = data["image"].to(device)   # Accessing image from the dictionary
+            label = data["label"].to(device) # Accessing label from the dictionary
+            depth = data["depth"].to(device) # Accessing depth from the dictionary
           
             # TODO1: implement training step
             # Forward pass
