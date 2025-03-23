@@ -55,7 +55,7 @@ def train(
     metrics = {"train_acc": [], "val_acc": [], "train_depth_error": [], "val_depth_error": []}
 
     # training loop
-   for epoch in range(num_epoch):
+    for epoch in range(num_epoch):
         model.train()
 
         for img, label, depth in train_data:
