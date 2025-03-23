@@ -61,9 +61,13 @@ def train(
         model.train()
         
         for data in train_data:
-            img = torch.tensor(data["image"]).to(device)   # Accessing image from the dictionary
-            label = torch.tensor(data["label"]).to(device) # Accessing label from the dictionary
-            depth = torch.tensor(data["depth"]).to(device) # Accessing depth from the dictionary
+            if isinstance(data, dict) and all(key in data for key in ["image", "label", "depth"]):
+              img = data["image"].to(device)  # Move image to device (GPU or CPU)
+              label = data["label"].to(device)  # Move label to device
+              depth = data["depth"].to(device)  # Move depth to device
+            else:
+              print("Error: Data is not in the expected format (missing keys).")
+            continue
           
             # TODO1: implement training step
             # Forward pass
