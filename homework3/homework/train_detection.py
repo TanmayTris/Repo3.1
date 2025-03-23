@@ -106,7 +106,7 @@ def train(
                 # TODO: compute validation accuracy
                 # Forward pass (same as in training, but no backpropagation here)
               if model_name == "detector":  # For the detector model
-                 logits, raw_depth = model(img)
+                logits, raw_depth = model(img)
             
                 # Compute losses
                 segmentation_loss_value = segmentation_loss(logits, label)
@@ -115,9 +115,9 @@ def train(
                 # Total loss
                 loss = segmentation_loss_value + depth_loss_value
             
-             else:  # For other models like classifier
-               logits = model(img)  # Classifier directly returns logits
-               loss = loss_func(logits, label)
+              else:  # For other models like classifier
+                logits = model(img)  # Classifier directly returns logits
+                loss = loss_func(logits, label)
                # Calculate validation accuracy
                 _, preds = logits.max(1)
                 correct = (preds == label).sum().item()
