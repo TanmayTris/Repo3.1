@@ -20,11 +20,11 @@ class DiceLoss(nn.Module):
 
     def forward(self, logits, target):
         # Apply softmax on logits to get probabilities
-        probs = torch.softmax(logits, dim=1)
+        probs = torch.softmax(logits.view(logits.size(0), -1), dim=1)
 
         # Convert target to one-hot encoding
-        target_one_hot = torch.eye(self.num_classes)[target].to(logits.device)  # Shape: (batch_size, num_classes, height, width)
-
+        target = target.view(target.size(0), -1)  
+        target = torch.nn.functional.one_hot(target.long(), num_classes=logits.shape[1])
         # Compute intersection and union
         intersection = torch.sum(probs * target_one_hot, dim=[2, 3])  # Sum over height and width
         union = torch.sum(probs, dim=[2, 3]) + torch.sum(target_one_hot, dim=[2, 3])
