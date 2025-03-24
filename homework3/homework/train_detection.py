@@ -72,7 +72,7 @@ def train(
     logger = tb.SummaryWriter(log_dir)
 
     # note: the grader uses default kwargs, you'll have to bake them in for the final submission
-    model = load_model(model_name, **kwargs)
+    model = model = load_model(model_name, in_channels=3, num_classes=128).to(device)  # Set num_classes to 128
     model = model.to(device)
     model.train()
 
