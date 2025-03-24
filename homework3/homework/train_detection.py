@@ -25,7 +25,7 @@ class DiceLoss(nn.Module):
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
         return 1 - torch.mean(dice)
 
-# Define IoU for evaluation metric
+# Define IoU for evaluation metrics
 def compute_iou(pred, target, num_classes=3):
     iou = []
     for i in range(num_classes):
