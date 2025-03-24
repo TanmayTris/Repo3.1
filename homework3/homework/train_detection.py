@@ -16,17 +16,19 @@ class DiceLoss(nn.Module):
         super(DiceLoss, self).__init__()
 
     def forward(self, preds, targets, smooth=1e-6):
-        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class 
+        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class
         targets = targets.float()
-        class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
+
         intersection = (preds * targets).sum()
         dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
         return 1 - dice
-        dice_loss = DiceLoss()
-        segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
+
+dice_loss = DiceLoss()
+segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
 
 def combined_loss(logits, labels):
     return segmentation_loss(logits, labels) + dice_loss(logits, labels)
+
 
 def train(
     exp_dir: str = "logs",
@@ -58,14 +60,14 @@ def train(
     model = model.to(device)
     model.train()
 
-    train_data = load_data("drive_data/train", shuffle=True, batch_size=batch_size, num_workers=5)
+    train_data = load_data("drive_data/train", shuffle=True, batch_size=batch_size, num_workers=2)
     val_data = load_data("drive_data/val", shuffle=False)
 
     # Loss functions
     # Compute class weights dynamically from dataset (optional)
     class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
     segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
-    dice_loss = DiceLoss()
+
     # segmentation_loss = nn.CrossEntropyLoss()
     depth_loss = nn.L1Loss()
    
@@ -114,9 +116,10 @@ def train(
             global_step += 1
 
         # disable gradient computation and switch to evaluation mode
-            model.eval()
             with torch.no_grad():
-             for data in val_data:
+              model.eval()
+            
+            for img, track, depth in val_data:
                 img = data["image"].to(device)     # Move image to device (GPU or CPU)
                 label = data["track"].to(device)   # Move track to device
                 depth = data["depth"].to(device)   # Move depth to device
