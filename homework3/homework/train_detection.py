@@ -39,8 +39,8 @@ def train(
     logger = tb.SummaryWriter(log_dir)
 
     # note: the grader uses default kwargs, you'll have to bake them in for the final submission
-    # model = load_model(model_name, **kwargs)
-    model = load_model(model_name, down_layers=down_layers, up_layers=up_layers, **kwargs)
+    model = load_model(model_name, **kwargs)
+    # model = load_model(model_name, down_layers=down_layers, up_layers=up_layers, **kwargs)
     model = model.to(device)
     model.train()
 
