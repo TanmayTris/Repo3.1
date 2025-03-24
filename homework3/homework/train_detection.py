@@ -11,24 +11,6 @@ from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
 
-class DiceLoss(nn.Module):
-    def __init__(self):
-        super(DiceLoss, self).__init__()
-
-    def forward(self, preds, targets, smooth=1e-6):
-        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class
-        targets = targets.float()
-
-        intersection = (preds * targets).sum()
-        dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
-        return 1 - dice
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
-dice_loss = DiceLoss()
-segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
-
-def combined_loss(logits, labels):
-    return segmentation_loss(logits, labels) + dice_loss(logits, labels)
 
 
 def train(
@@ -65,11 +47,7 @@ def train(
     val_data = load_data("drive_data/val", shuffle=False)
 
     # Loss functions
-    # Compute class weights dynamically from dataset (optional)
-    class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
-    segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
-
-    # segmentation_loss = nn.CrossEntropyLoss()
+    segmentation_loss = nn.CrossEntropyLoss()
     depth_loss = nn.L1Loss()
    
     # optimizer
