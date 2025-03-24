@@ -13,19 +13,25 @@ from homework.datasets.road_dataset import load_data
 
 # Define Dice Loss for segmentation
 class DiceLoss(nn.Module):
-    def __init__(self, smooth=1e-6):
+    def __init__(self, num_classes=3, smooth=1e-6):
         super(DiceLoss, self).__init__()
+        self.num_classes = num_classes
         self.smooth = smooth
 
     def forward(self, logits, target):
         # Apply softmax on logits to get probabilities
         probs = torch.softmax(logits, dim=1)
-        # Ensure the target has the same dimensions as probs
-        target = target.unsqueeze(1)  # Shape: (batch_size, 1, height, width)
-        intersection = torch.sum(probs * target, dim=[2, 3])
-        union = torch.sum(probs, dim=[2, 3]) + torch.sum(target, dim=[2, 3])
+
+        # Convert target to one-hot encoding
+        target_one_hot = torch.eye(self.num_classes)[target].to(logits.device)  # Shape: (batch_size, num_classes, height, width)
+
+        # Compute intersection and union
+        intersection = torch.sum(probs * target_one_hot, dim=[2, 3])  # Sum over height and width
+        union = torch.sum(probs, dim=[2, 3]) + torch.sum(target_one_hot, dim=[2, 3])
+
+        # Compute Dice coefficient
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
-        return dice
+        return dice.mean()
 
 # Define IoU for evaluation metrics
 def compute_iou(pred, target, num_classes=3):
