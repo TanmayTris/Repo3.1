@@ -47,7 +47,11 @@ def train(
     val_data = load_data("drive_data/val", shuffle=False)
 
     # Loss functions
-    segmentation_loss = nn.CrossEntropyLoss()
+    # Compute class weights dynamically from dataset (optional)
+    class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
+    segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
+
+    # segmentation_loss = nn.CrossEntropyLoss()
     depth_loss = nn.L1Loss()
    
     # optimizer
