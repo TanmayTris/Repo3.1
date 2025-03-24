@@ -22,10 +22,11 @@ class DiceLoss(nn.Module):
         intersection = (preds * targets).sum()
         dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
         return 1 - dice
+        dice_loss = DiceLoss()
+        segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
 
 def combined_loss(logits, labels):
     return segmentation_loss(logits, labels) + dice_loss(logits, labels)
-
 
 def train(
     exp_dir: str = "logs",
