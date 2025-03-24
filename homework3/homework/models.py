@@ -123,12 +123,15 @@ class Detector(torch.nn.Module):
         self.down1 = self.conv_block(in_channels, 16)
         self.down2 = self.conv_block(16, 32)
         self.down3 = self.conv_block(32, 64)
+        self.down4 = self.conv_block(64, 128)  # New Down layer
+        self.down5 = self.conv_block(128, 256)  # New Down layer
         
         # Up-sampling layers (Transposed Convolutional layers)
         self.up1 = self.upconv_block(64, 32)
         self.up2 = self.upconv_block(32, 16)
         self.up3 = self.upconv_block(16, 16)
-
+        self.up4 = self.upconv_block(32, 16)  # New Up layer
+        self.up5 = self.upconv_block(16, 16)  # New Up layer
         # Segmentation head (Logits)
         self.logits = nn.Conv2d(16, num_classes, kernel_size=1)  # Output size: (B, 3, 96, 128)
         
@@ -178,15 +181,19 @@ class Detector(torch.nn.Module):
         x1 = self.down1(z)
         x2 = self.down2(x1)
         x3 = self.down3(x2)
+        x4 = self.down4(x3)  # New layer
+        x5 = self.down5(x4)  # New layer
 
         # Up-sampling pass (convolution transpose layers)
-        x4 = self.up1(x3)
-        x5 = self.up2(x4)
-        x6 = self.up3(x5)
-
+        x6 = self.up1(x5)
+        x7 = self.up2(x6)
+        x8 = self.up3(x7)
+        x9 = self.up4(x8)  # New layer
+        x10 = self.up5(x9)  # New layer
+        
         # Output heads
-        logits = self.logits(x6)  # (B, 3, 96, 128)
-        depth = self.depth(x6)  # (B, 1, 96, 128)
+        logits = self.logits(x10)  # (B, 3, 96, 128)
+        depth = self.depth(x10)  # (B, 1, 96, 128)
 
         return logits, depth
 
