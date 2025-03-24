@@ -11,6 +11,8 @@ from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
 
+import torch.nn.functional as F
+
 class DiceLoss(nn.Module):
     def __init__(self, num_classes=3, smooth=1e-6):
         super(DiceLoss, self).__init__()
@@ -21,12 +23,13 @@ class DiceLoss(nn.Module):
         # Apply softmax on logits to get probabilities
         probs = torch.softmax(logits, dim=1)  # Shape: (batch_size, num_classes, height, width)
 
-        # Ensure the target has the same dimensions as probs
-        if target.dim() == 3:  # Shape: (batch_size, height, width)
-            target = target.unsqueeze(1)  # Convert to (batch_size, 1, height, width)
+        # Ensure target is 4D
+        if target.dim() == 3:
+            target = target.unsqueeze(1)  # (batch_size, 1, height, width)
 
-        # Convert target to one-hot encoding
-        target_one_hot = torch.zeros_like(probs).scatter_(1, target.long(), 1)  # Shape: (batch_size, num_classes, height, width)
+        # Convert target to one-hot encoding properly
+        target_one_hot = F.one_hot(target.long(), num_classes=self.num_classes)  # (batch_size, height, width, num_classes)
+        target_one_hot = target_one_hot.permute(0, 3, 1, 2).float()  # Reshape to (batch_size, num_classes, height, width)
 
         # Compute intersection and union
         intersection = torch.sum(probs * target_one_hot, dim=[2, 3])  # Sum over height and width
@@ -34,7 +37,8 @@ class DiceLoss(nn.Module):
 
         # Compute Dice coefficient
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
-        return 1 - dice.mean()  # Return Dice loss (1 - Dice coefficient)
+        return 1 - dice.mean()  # Return Dice loss
+
 
 # Define IoU for evaluation metrics
 def compute_iou(pred, target, num_classes=3):
