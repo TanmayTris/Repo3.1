@@ -222,6 +222,8 @@ MODEL_FACTORY = {
 def load_model(
     model_name: str,
     with_weights: bool = False,
+    down_layers: int = 3,  # Added
+    up_layers: int = 3,    # Added
     **model_kwargs,
 ) -> torch.nn.Module:
     """
