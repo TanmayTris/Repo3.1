@@ -11,6 +11,23 @@ from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
 
+class DiceLoss(nn.Module):
+    def __init__(self):
+        super(DiceLoss, self).__init__()
+
+    def forward(self, preds, targets, smooth=1e-6):
+        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class
+        targets = targets.float()
+
+        intersection = (preds * targets).sum()
+        dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
+        return 1 - dice
+
+dice_loss = DiceLoss()
+segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
+
+def combined_loss(logits, labels):
+    return segmentation_loss(logits, labels) + dice_loss(logits, labels)
 
 
 def train(
