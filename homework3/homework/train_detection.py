@@ -11,7 +11,29 @@ from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
 
+Define Dice Loss for segmentation
+class DiceLoss(nn.Module):
+    def __init__(self, smooth=1e-6):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
 
+    def forward(self, logits, target):
+        # Apply softmax on logits to get probabilities
+        probs = torch.softmax(logits, dim=1)
+        intersection = torch.sum(probs * target, dim=[2, 3])
+        union = torch.sum(probs, dim=[2, 3]) + torch.sum(target, dim=[2, 3])
+        dice = (2. * intersection + self.smooth) / (union + self.smooth)
+        return 1 - torch.mean(dice)
+
+# Define IoU for evaluation metric
+def compute_iou(pred, target, num_classes=3):
+    iou = []
+    for i in range(num_classes):
+        # Calculate intersection and union for each class
+        intersection = torch.sum((pred == i) & (target == i)).float()
+        union = torch.sum((pred == i) | (target == i)).float()
+        iou.append(intersection / (union + 1e-6))  # Avoid division by zero
+    return torch.mean(torch.tensor(iou))
 
 def train(
     exp_dir: str = "logs",
@@ -47,7 +69,7 @@ def train(
     val_data = load_data("drive_data/val", shuffle=False)
 
     # Loss functions
-    segmentation_loss = nn.CrossEntropyLoss()
+    segmentation_loss = DiceLoss() 
     depth_loss = nn.L1Loss()
    
     # optimizer
@@ -89,6 +111,7 @@ def train(
             _, predictions = logits.max(1)  # get the predicted class (index of max logit)
             correct = (predictions == label).sum().item()
             accuracy = correct / label.size(0)
+            iou = compute_iou(predictions, label)  # Compute IoU for training
             depth_error = torch.abs(raw_depth - depth).mean().item()
             metrics["train_acc"].append(accuracy)
             metrics["train_depth_error"].append(depth_error)
@@ -122,20 +145,26 @@ def train(
                 _, preds = logits.max(1)
                 correct = (preds == label).sum().item()
                 accuracy = correct / label.size(0)
+                iou = compute_iou(preds, label)  # Compute IoU for validation
                 depth_error = torch.abs(raw_depth - depth).mean().item()
 
                 metrics["val_acc"].append(accuracy)
+                metrics["val_iou"].append(iou)
                 metrics["val_depth_error"].append(depth_error)
 
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
         epoch_val_acc = torch.as_tensor(metrics["val_acc"]).mean()
+        epoch_train_iou = torch.as_tensor(metrics["train_iou"]).mean()
+        epoch_val_iou = torch.as_tensor(metrics["val_iou"]).mean()
         epoch_train_depth_error = torch.as_tensor(metrics["train_depth_error"]).mean()
         epoch_val_depth_error = torch.as_tensor(metrics["val_depth_error"]).mean()
 
         logger.add_scalar("train/accuracy", epoch_train_acc, epoch)
         logger.add_scalar("val/accuracy", epoch_val_acc, epoch)
+        logger.add_scalar("train/iou", epoch_train_iou, epoch)
+        logger.add_scalar("val/iou", epoch_val_iou, epoch)
         logger.add_scalar("train/depth_error", epoch_train_depth_error, epoch)
         logger.add_scalar("val/depth_error", epoch_val_depth_error, epoch)
         
@@ -143,6 +172,7 @@ def train(
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
                 print(f"Epoch {epoch + 1}/{num_epoch}: "
                 f"Train Acc: {epoch_train_acc:.4f}, Val Acc: {epoch_val_acc:.4f}, "
+                f"Train IoU: {epoch_train_iou:.4f}, Val IoU: {epoch_val_iou:.4f}, "
                 f"Train Depth Error: {epoch_train_depth_error:.4f}, Val Depth Error: {epoch_val_depth_error:.4f}")
             
 
