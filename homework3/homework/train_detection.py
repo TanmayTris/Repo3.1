@@ -46,8 +46,14 @@ def train(
     train_data = load_data("drive_data/train", shuffle=True, batch_size=batch_size, num_workers=2)
     val_data = load_data("drive_data/val", shuffle=False)
 
+    # Assign weights for loss function to improve IoU performance
+    if class_weights is not None:
+        class_weights = torch.tensor(class_weights, dtype=torch.float32, device=device)
+    else:
+        class_weights = torch.tensor([1.0, 2.0, 0.5], dtype=torch.float32, device=device)  # Example weights
+    
     # Loss functions
-    segmentation_loss = nn.CrossEntropyLoss()
+    segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
     depth_loss = nn.L1Loss()
    
     # optimizer
