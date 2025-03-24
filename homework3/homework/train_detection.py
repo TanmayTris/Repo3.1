@@ -115,9 +115,7 @@ def train(
         # disable gradient computation and switch to evaluation mode
             model.eval()
             with torch.no_grad():
-              
-            
-            for data in val_data:
+             for data in val_data:
                 img = data["image"].to(device)     # Move image to device (GPU or CPU)
                 label = data["track"].to(device)   # Move track to device
                 depth = data["depth"].to(device)   # Move depth to device
