@@ -20,10 +20,12 @@ class DiceLoss(nn.Module):
     def forward(self, logits, target):
         # Apply softmax on logits to get probabilities
         probs = torch.softmax(logits, dim=1)
+        # Ensure the target has the same dimensions as probs
+        target = target.unsqueeze(1)  # Shape: (batch_size, 1, height, width)
         intersection = torch.sum(probs * target, dim=[2, 3])
         union = torch.sum(probs, dim=[2, 3]) + torch.sum(target, dim=[2, 3])
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
-        return 1 - torch.mean(dice)
+        return dice
 
 # Define IoU for evaluation metrics
 def compute_iou(pred, target, num_classes=3):
