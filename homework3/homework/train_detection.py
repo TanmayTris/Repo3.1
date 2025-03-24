@@ -16,7 +16,7 @@ class DiceLoss(nn.Module):
         super(DiceLoss, self).__init__()
 
     def forward(self, preds, targets, smooth=1e-6):
-        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class
+        preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class 
         targets = targets.float()
 
         intersection = (preds * targets).sum()
