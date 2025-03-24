@@ -18,7 +18,7 @@ class DiceLoss(nn.Module):
     def forward(self, preds, targets, smooth=1e-6):
         preds = torch.softmax(preds, dim=1)[:, 1]  # Take foreground class 
         targets = targets.float()
-
+        class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
         intersection = (preds * targets).sum()
         dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
         return 1 - dice
