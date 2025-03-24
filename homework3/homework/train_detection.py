@@ -22,6 +22,7 @@ class DiceLoss(nn.Module):
         intersection = (preds * targets).sum()
         dice = (2. * intersection + smooth) / (preds.sum() + targets.sum() + smooth)
         return 1 - dice
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class_weights = torch.tensor([0.1, 1.0], device=device)  # Example: Lower weight for background, higher for foreground
 dice_loss = DiceLoss()
 segmentation_loss = nn.CrossEntropyLoss(weight=class_weights)
