@@ -11,7 +11,7 @@ from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
 
-Define Dice Loss for segmentation
+# Define Dice Loss for segmentation
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1e-6):
         super(DiceLoss, self).__init__()
