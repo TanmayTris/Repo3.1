@@ -2,26 +2,11 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F 
 
 HOMEWORK_DIR = Path(__file__).resolve().parent
 INPUT_MEAN = [0.2788, 0.2657, 0.2629]
 INPUT_STD = [0.2064, 0.1944, 0.2252]
 
-class ClassificationLoss(nn.Module):
-    def forward(self, logits: torch.Tensor, target: torch.LongTensor) -> torch.Tensor:
-        """
-        Multi-class classification loss
-        Hint: simple one-liner
-        
-        Args:
-            logits: tensor (b, c) logits, where c is the number of classes
-            target: tensor (b,) labels
-        
-        Returns:
-            tensor, scalar loss
-        """
-        return nn.CrossEntropyLoss()(logits, target)
 
 class Classifier(nn.Module):
     def __init__(
@@ -42,17 +27,7 @@ class Classifier(nn.Module):
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
 
         # TODO: implement
-        # Convolutional layers
-        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-
-        # Fully connected layers
-        self.fc1 = nn.Linear(128 * 8 * 8, 512)
-        self.fc2 = nn.Linear(512, num_classes)
-
-        # Dropout for regularization
-        self.dropout = nn.Dropout(0.5)
+        pass
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -62,26 +37,11 @@ class Classifier(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        # optional: normalizes the inputs
+        # optional: normalizes the input
         z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
         # TODO: replace with actual forward pass
-         # Forward pass through convolutional layers
-        x = F.relu(self.conv1(z))
-        x = F.max_pool2d(x, 2)  # Max pooling
-        x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, 2)
-        x = F.relu(self.conv3(x))
-        x = F.max_pool2d(x, 2)
-
-        # Flatten the output for fully connected layers
-        x = torch.flatten(x, 1)
-
-        # Pass through fully connected layers
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)  # Apply dropout
-        logits = self.fc2(x)
-       # logits = torch.randn(x.size(0), 6)
+        logits = torch.randn(x.size(0), 6)
 
         return logits
 
@@ -119,43 +79,7 @@ class Detector(torch.nn.Module):
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
 
         # TODO: implement
-        # Down-sampling layers (Convolutional layers)
-        self.down1 = self.conv_block(in_channels, 16)
-        self.down2 = self.conv_block(16, 32)
-        self.down3 = self.conv_block(32, 64)
-        
-        # Up-sampling layers (Transposed Convolutional layers)
-        self.up1 = self.upconv_block(64, 32)
-        self.up2 = self.upconv_block(32, 16)
-        self.up3 = self.upconv_block(16, 16)
-
-        # Segmentation head (Logits)
-        self.logits = nn.Conv2d(16, num_classes, kernel_size=1)  # Output size: (B, 3, 96, 128)
-        
-        # Depth regression head
-        self.depth = nn.Conv2d(16, 1, kernel_size=1)  # Output size: (B, 1, 96, 128)
-
-    def conv_block(self, in_channels, out_channels):
-        """
-        A helper function to create a block of convolution + ReLU + MaxPooling
-        """
-        return nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True)
-        )
-
-    def upconv_block(self, in_channels, out_channels):
-        """
-        A helper function to create a block of Transposed Convolution (upsampling)
-        """
-        return nn.Sequential(
-            nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True)
-        )
+        pass
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -174,21 +98,10 @@ class Detector(torch.nn.Module):
         z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
         # TODO: replace with actual forward pass
-        # Down-sampling pass (convolution layers)
-        x1 = self.down1(z)
-        x2 = self.down2(x1)
-        x3 = self.down3(x2)
+        logits = torch.randn(x.size(0), 3, x.size(2), x.size(3))
+        raw_depth = torch.rand(x.size(0), x.size(2), x.size(3))
 
-        # Up-sampling pass (convolution transpose layers)
-        x4 = self.up1(x3)
-        x5 = self.up2(x4)
-        x6 = self.up3(x5)
-
-        # Output heads
-        logits = self.logits(x6)  # (B, 3, 96, 128)
-        depth = self.depth(x6)  # (B, 1, 96, 128)
-
-        return logits, depth
+        return logits, raw_depth
 
     def predict(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -207,8 +120,7 @@ class Detector(torch.nn.Module):
         pred = logits.argmax(dim=1)
 
         # Optional additional post-processing for depth only if needed
-        # Normalize depth if required (scaling between 0 and 1)
-        depth = torch.sigmoid(raw_depth)  
+        depth = raw_depth
 
         return pred, depth
 
