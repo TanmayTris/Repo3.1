@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.utils.tensorboard as tb
 
+from torchvision import transforms
 from .models import ClassificationLoss, load_model, save_model
 # from .utils import load_data
 from homework.datasets.road_dataset import load_data
@@ -44,8 +45,16 @@ def train(
     # model = load_model(model_name, down_layers=down_layers, up_layers=up_layers, **kwargs)
     model = model.to(device)
     model.train()
-
-    train_data = load_data("drive_data/train", shuffle=True, batch_size=batch_size, num_workers=2)
+    # Define your data augmentation pipeline
+    data_transforms = transforms.Compose([
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+    transforms.ToTensor()
+])
+    
+    train_data = load_data("drive_data/train", shuffle=True, batch_size=batch_size, num_workers=2, transform=data_transforms)
     val_data = load_data("drive_data/val", shuffle=False)
 
     # Assign weights for loss function to improve IoU performance
@@ -59,7 +68,7 @@ def train(
     depth_loss = nn.L1Loss()
    
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     
     global_step = 0
     metrics = {"train_acc": [], "val_acc": [], "train_depth_error": [], "val_depth_error": []}
