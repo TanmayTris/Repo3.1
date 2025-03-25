@@ -68,7 +68,7 @@ def train(
     depth_loss = nn.L1Loss()
    
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     
     global_step = 0
     metrics = {"train_acc": [], "val_acc": [], "train_depth_error": [], "val_depth_error": []}
@@ -108,14 +108,14 @@ def train(
             correct = (predictions == label).sum().item()
             accuracy = correct / label.size(0)
             depth_error = torch.abs(raw_depth - depth).mean().item()
+        if model_name == "detector" else 0
             metrics["train_acc"].append(accuracy)
             metrics["train_depth_error"].append(depth_error)
             global_step += 1
 
         # disable gradient computation and switch to evaluation mode
-            with torch.no_grad():
-              model.eval()
-            
+        model.eval()
+        with torch.no_grad():
             for img, track, depth in val_data:
                 img = data["image"].to(device)     # Move image to device (GPU or CPU)
                 label = data["track"].to(device)   # Move track to device
@@ -142,7 +142,7 @@ def train(
                 correct = (preds == label).sum().item()
                 accuracy = correct / label.size(0)
                 depth_error = torch.abs(raw_depth - depth).mean().item()
-
+             if model_name == "detector" else 0
                 metrics["val_acc"].append(accuracy)
                 metrics["val_depth_error"].append(depth_error)
 
