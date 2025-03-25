@@ -27,7 +27,7 @@ class Classifier(nn.Module):
     def __init__(
         self,
         in_channels: int = 3,
-        num_classes: int = 6,
+        num_classes: int = 3,
     ):
         """
         A convolutional network for image classification.
