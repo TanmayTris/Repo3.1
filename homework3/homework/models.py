@@ -27,7 +27,7 @@ class Classifier(nn.Module):
     def __init__(
         self,
         in_channels: int = 3,
-        num_classes: int = 3,
+        num_classes: int = 6,
     ):
         """
         A convolutional network for image classification.
@@ -47,7 +47,7 @@ class Classifier(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
 
-        # Fully connected layer
+        # Fully connected layers
         self.fc1 = nn.Linear(128 * 8 * 8, 512)
         self.fc2 = nn.Linear(512, num_classes)
 
