@@ -20,7 +20,7 @@ def train(
     lr: float = 1e-3,
     batch_size: int = 128,
     seed: int = 2024,
-    class_weights: list = None,  # Added argument for class weights
+    class_weights: list = None,  # Added argument for class weight
     **kwargs,
 ):
     if torch.cuda.is_available():
